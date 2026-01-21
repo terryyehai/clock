@@ -58,13 +58,15 @@ function updateClock() {
     checkAlarms(now);
 }
 
+// Clock
 function flipUpdate(card, val, prev) {
     if (val === prev) return;
 
-    const top = card.querySelector('.top');
-    const bottom = card.querySelector('.bottom');
-    const topBack = card.querySelector('.top-back');
-    const bottomBack = card.querySelector('.bottom-back');
+    // Target inner spans
+    const top = card.querySelector('.top span');
+    const bottom = card.querySelector('.bottom span');
+    const topBack = card.querySelector('.top-back span');
+    const bottomBack = card.querySelector('.bottom-back span');
 
     if (prev === null) {
         top.textContent = val;
