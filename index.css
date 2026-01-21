@@ -129,11 +129,14 @@ body {
     background: var(--card-bg);
     border-radius: 10px;
     box-shadow: var(--card-shadow);
+    -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
+    transform-style: preserve-3d;
 }
 
 /* TOP - shows upper half */
 .flip-card .top {
+    -webkit-clip-path: inset(0 0 50% 0);
     clip-path: inset(0 0 50% 0);
     z-index: 3;
     transform-origin: bottom center;
@@ -141,12 +144,14 @@ body {
 
 /* BOTTOM - shows lower half */
 .flip-card .bottom {
+    -webkit-clip-path: inset(50% 0 0 0);
     clip-path: inset(50% 0 0 0);
     z-index: 1;
 }
 
 /* TOP-BACK - new number top (hidden initially) */
 .flip-card .top-back {
+    -webkit-clip-path: inset(0 0 50% 0);
     clip-path: inset(0 0 50% 0);
     z-index: 2;
     transform-origin: bottom center;
@@ -155,6 +160,7 @@ body {
 
 /* BOTTOM-BACK - new number bottom */
 .flip-card .bottom-back {
+    -webkit-clip-path: inset(50% 0 0 0);
     clip-path: inset(50% 0 0 0);
     z-index: 0;
 }
