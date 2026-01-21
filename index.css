@@ -12,6 +12,7 @@
     --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
     --card-height: 160px;
     --card-width: 120px;
+    --font-size: 6rem;
 }
 
 [data-theme="minimalist"] {
@@ -109,7 +110,7 @@ body {
 }
 
 /* ========================================
-   FLIP CARD - Complete Rewrite
+   FLIP CARD - Fixed Implementation
    ======================================== */
 
 .flip-unit {
@@ -125,7 +126,7 @@ body {
     height: 100%;
 }
 
-/* Each half of the card */
+/* Each half of the card - using span inner element for text positioning */
 .flip-card .top,
 .flip-card .bottom,
 .flip-card .top-back,
@@ -136,11 +137,24 @@ body {
     height: 50%;
     overflow: hidden;
     background-color: var(--card-bg);
-    color: var(--card-text);
-    font-size: 6rem;
-    font-weight: bold;
-    text-align: center;
     box-shadow: var(--card-shadow);
+}
+
+/* Inner span holds the text - full height of the card */
+.flip-card .top span,
+.flip-card .bottom span,
+.flip-card .top-back span,
+.flip-card .bottom-back span {
+    display: block;
+    width: 100%;
+    height: var(--card-height);
+    /* FULL card height */
+    line-height: var(--card-height);
+    /* Center text vertically */
+    text-align: center;
+    font-size: var(--font-size);
+    font-weight: bold;
+    color: var(--card-text);
 }
 
 /* TOP HALF - shows upper portion of digit */
@@ -148,9 +162,13 @@ body {
 .flip-card .top-back {
     top: 0;
     border-radius: 10px 10px 0 0;
-    line-height: var(--card-height);
-    /* This centers the FULL height text */
     border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+/* The span in top half sits at top - shows upper half of text */
+.flip-card .top span,
+.flip-card .top-back span {
+    /* Text is at normal position, top half clips shows top of digit */
 }
 
 /* BOTTOM HALF - shows lower portion of digit */
@@ -158,8 +176,13 @@ body {
 .flip-card .bottom-back {
     bottom: 0;
     border-radius: 0 0 10px 10px;
-    /* Negative line-height trick: pull text up so we see bottom half */
-    line-height: 0;
+}
+
+/* The span in bottom half is pulled UP to show bottom half of text */
+.flip-card .bottom span,
+.flip-card .bottom-back span {
+    transform: translateY(-50%);
+    /* Pull text up by half its height */
 }
 
 /* Z-index layering for static state */
@@ -175,7 +198,6 @@ body {
     z-index: 2;
     transform-origin: bottom center;
     transform: rotateX(90deg);
-    /* Hidden initially */
 }
 
 .flip-card .bottom-back {
@@ -186,13 +208,11 @@ body {
    FLIP ANIMATION
    ======================================== */
 
-/* When flipping, the old top folds down */
 .flip-card.flipping .top {
     animation: flipTop 0.6s ease-in-out forwards;
     transform-origin: bottom center;
 }
 
-/* The new top (top-back) unfolds from above */
 .flip-card.flipping .top-back {
     animation: flipTopBack 0.6s ease-in-out forwards;
     transform-origin: bottom center;
@@ -372,13 +392,7 @@ input:checked+.slider:before {
     :root {
         --card-height: 100px;
         --card-width: 80px;
-    }
-
-    .flip-card .top,
-    .flip-card .bottom,
-    .flip-card .top-back,
-    .flip-card .bottom-back {
-        font-size: 3.5rem;
+        --font-size: 3.5rem;
     }
 
     .separator {
@@ -390,6 +404,7 @@ input:checked+.slider:before {
     :root {
         --card-height: 140px;
         --card-width: 100px;
+        --font-size: 5rem;
     }
 
     .flip-clock {
@@ -399,12 +414,5 @@ input:checked+.slider:before {
 
     .separator {
         display: none;
-    }
-
-    .flip-card .top,
-    .flip-card .bottom,
-    .flip-card .top-back,
-    .flip-card .bottom-back {
-        font-size: 5rem;
     }
 }

@@ -83,10 +83,11 @@ function updateClock() {
 function updateFlipUnit(cardEl, newValue, oldValue) {
     if (newValue === oldValue) return;
 
-    const top = cardEl.querySelector('.top');
-    const bottom = cardEl.querySelector('.bottom');
-    const topBack = cardEl.querySelector('.top-back');
-    const bottomBack = cardEl.querySelector('.bottom-back');
+    // Target the span inside each half
+    const top = cardEl.querySelector('.top span');
+    const bottom = cardEl.querySelector('.bottom span');
+    const topBack = cardEl.querySelector('.top-back span');
+    const bottomBack = cardEl.querySelector('.bottom-back span');
 
     // If first run, just set values without animation
     if (oldValue === null) {
