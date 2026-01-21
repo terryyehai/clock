@@ -1,0 +1,384 @@
+/* CSS Reset & Basics */
+:root {
+    /* Classic Black (Default) */
+    --bg-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --card-bg: #333;
+    --card-text: #f0f0f0;
+    --accent-color: #ff4500; /* For alarm or active elements */
+    --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --flip-duration: 0.6s;
+    --modal-bg: #2a2a2a;
+    --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="minimalist"] {
+    --bg-color: #f5f5f5;
+    --text-color: #333;
+    --card-bg: #fff;
+    --card-text: #222;
+    --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    --modal-bg: #fff;
+}
+
+[data-theme="neon"] {
+    --bg-color: #050510;
+    --text-color: #0ff;
+    --card-bg: #111;
+    --card-text: #f0f;
+    --card-shadow: 0 0 15px rgba(255, 0, 255, 0.3);
+    --modal-bg: #111;
+    --accent-color: #0ff;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--font-family);
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.app-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* Controls */
+.controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+    display: flex;
+    gap: 15px;
+}
+
+.icon-btn {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    font-size: 1.5rem;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.3s;
+}
+
+.icon-btn:hover {
+    opacity: 1;
+}
+
+/* Clock Display */
+.clock-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.flip-clock {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    perspective: 1000px;
+}
+
+.separator {
+    font-size: 5rem;
+    font-weight: bold;
+    padding-bottom: 20px; /* Align visually with cards */
+}
+
+/* Flip Card Core */
+.flip-unit {
+    position: relative;
+    width: 120px;
+    height: 160px;
+    background-color: var(--card-bg);
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+    font-size: 6rem;
+    font-weight: bold;
+    color: var(--card-text);
+    text-align: center;
+    line-height: 160px;
+}
+
+.flip-card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Top and Bottom Halves */
+.top, .bottom, .top-back, .bottom-back {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    overflow: hidden;
+    background-color: var(--card-bg);
+}
+
+.top, .top-back {
+    top: 0;
+    border-radius: 10px 10px 0 0;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.bottom, .bottom-back {
+    bottom: 0;
+    border-radius: 0 0 10px 10px;
+    line-height: 0; /* Align text to top of bottom half */
+    display: flex;
+    align-items: flex-end; /* Align text to bottom visually */
+    justify-content: center;
+}
+/* Adjust line-height/alignment for split effect */
+.top, .top-back {
+    line-height: 160px;
+}
+.bottom, .bottom-back {
+    line-height: 0; /* Trick to show bottom half of text */
+}
+/* Revisit the text positioning for perfect split */
+.top span, .top-back span, .bottom span, .bottom-back span {
+    display: block;
+    height: 160px;
+}
+/* Actually, simpler way specifically for fixed height */
+/* Let's use the standard flip implementation */
+
+.flip-unit .top, .flip-unit .top-back {
+    line-height: 160px; /* Center text vertically in full height */
+}
+.flip-unit .bottom, .flip-unit .bottom-back {
+    line-height: 0; 
+}
+
+
+/* Animation Layers */
+.top {
+    z-index: 2;
+    transform-origin: bottom center;
+}
+.bottom {
+    z-index: 1;
+}
+.top-back {
+    z-index: 1;
+    transform-origin: bottom center;
+    transform: rotateX(180deg); /* Start flipped up */
+}
+.bottom-back {
+    z-index: 0;
+    transform-origin: top center;
+    transform: rotateX(0deg); 
+}
+
+/* Animation Classes */
+.flip-down .top {
+    transform: rotateX(-180deg);
+    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+.flip-down .top-back {
+    z-index: 3;
+    transform: rotateX(0deg);
+    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+}
+
+.flip-down .bottom-back {
+    z-index: 2; /* Reveal new bottom */
+}
+
+
+/* Date Display */
+.date-display {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.date-item {
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+}
+
+.sub-text {
+    font-size: 1.2rem;
+    opacity: 0.8;
+}
+
+/* Modals */
+.hidden {
+    display: none !important;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    z-index: 200;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: var(--modal-bg);
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    color: var(--text-color);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+}
+
+.modal-content h2 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.setting-item {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    background-color: #444;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+.theme-options {
+    display: flex;
+    gap: 10px;
+}
+
+.theme-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Toggle Switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+input:checked + .slider {
+    background-color: var(--accent-color);
+}
+input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .flip-clock {
+        flex-direction: column; /* Stack for vertical on small screens if needed, or scale down */
+        gap: 10px;
+    }
+    
+    /* Better implementation for mobile: Scale down instead of stack completely if landscape preferred, 
+       but for portrait phone stacking is better */
+    
+    /* Let's try to keep horizontal but scale */
+    .flip-unit {
+        width: 80px;
+        height: 100px;
+        font-size: 3.5rem;
+        line-height: 100px;
+    }
+    
+    .flip-unit .top, .flip-unit .top-back {
+        line-height: 100px;
+    }
+    
+    .separator {
+        font-size: 3rem;
+    }
+    
+    /* If oriented portrait */
+    @media (orientation: portrait) {
+       .flip-clock {
+           flex-direction: column;
+       }
+       .separator {
+           display: none;
+       }
+       .flip-unit {
+           width: 160px;
+           height: 200px;
+           font-size: 8rem;
+           line-height: 200px;
+       }
+       .flip-unit .top, .flip-unit .top-back {
+            line-height: 200px;
+       }
+    }
+}

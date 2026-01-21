@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlipTime Web</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="index.css">
+    <!-- Day.js -->
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
+    <!-- Lunar Javascript -->
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.min.js"></script>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="app-container" id="app">
+        <header class="controls">
+            <button id="settings-btn" class="icon-btn"><i class="fas fa-cog"></i></button>
+            <button id="alarm-btn" class="icon-btn"><i class="fas fa-bell"></i></button>
+        </header>
+
+        <main class="clock-display">
+            <div class="flip-clock">
+                <!-- Hours -->
+                <div class="flip-unit" id="hours">
+                    <div class="flip-card" data-value="00">
+                        <div class="top">00</div>
+                        <div class="bottom">00</div>
+                        <div class="top-back">00</div>
+                        <div class="bottom-back">00</div>
+                    </div>
+                </div>
+                <div class="separator">:</div>
+                <!-- Minutes -->
+                <div class="flip-unit" id="minutes">
+                    <div class="flip-card" data-value="00">
+                        <div class="top">00</div>
+                        <div class="bottom">00</div>
+                        <div class="top-back">00</div>
+                        <div class="bottom-back">00</div>
+                    </div>
+                </div>
+                <div class="separator">:</div>
+                <!-- Seconds -->
+                <div class="flip-unit" id="seconds">
+                    <div class="flip-card" data-value="00">
+                        <div class="top">00</div>
+                        <div class="bottom">00</div>
+                        <div class="top-back">00</div>
+                        <div class="bottom-back">00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="date-display">
+                <div id="date-gregorian" class="date-item">loading...</div>
+                <div id="date-lunar" class="date-item sub-text">loading...</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>設定</h2>
+            <div class="setting-item">
+                <label>時區</label>
+                <select id="timezone-select"></select>
+            </div>
+            <div class="setting-item">
+                <label>主題</label>
+                <div class="theme-options">
+                    <button class="theme-btn" data-theme="classic" title="經典黑"
+                        style="background: #000; border: 1px solid #fff;"></button>
+                    <button class="theme-btn" data-theme="minimalist" title="極簡白"
+                        style="background: #fff; border: 1px solid #000;"></button>
+                    <button class="theme-btn" data-theme="neon" title="霓虹夜"
+                        style="background: #111; border: 1px solid #0ff;"></button>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>時間格式</label>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="format-toggle">
+                    <label for="format-toggle" class="slider round"></label>
+                </div>
+                <span id="format-label">24H</span>
+            </div>
+            <button id="close-settings" class="close-btn">關閉</button>
+        </div>
+    </div>
+
+    <!-- Alarm Modal -->
+    <div id="alarm-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>鬧鐘</h2>
+            <div id="alarm-list"></div>
+            <div class="add-alarm">
+                <input type="time" id="new-alarm-time">
+                <button id="add-alarm-btn">新增</button>
+            </div>
+            <button id="close-alarm" class="close-btn">關閉</button>
+        </div>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+
+</html>
