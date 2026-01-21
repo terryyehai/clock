@@ -88,28 +88,36 @@ function updateFlipUnit(cardEl, newValue, oldValue) {
     const topBack = cardEl.querySelector('.top-back');
     const bottomBack = cardEl.querySelector('.bottom-back');
 
-    // Setup initial state for animation
-    topBack.innerText = newValue;
-    bottomBack.innerText = newValue;
-    top.innerText = oldValue !== null ? oldValue : newValue;
-    bottom.innerText = oldValue !== null ? oldValue : newValue;
-
-    // If it's the first run, don't animate, just set
+    // If first run, just set values without animation
     if (oldValue === null) {
+        top.innerText = newValue;
+        bottom.innerText = newValue;
+        topBack.innerText = newValue;
+        bottomBack.innerText = newValue;
         return;
     }
 
-    // Trigger Animation
-    cardEl.classList.remove('flip-down');
-    void cardEl.offsetWidth; // Force reflow
-    cardEl.classList.add('flip-down');
+    // Prepare animation:
+    // Current top/bottom show the OLD value
+    // top-back/bottom-back show the NEW value
+    top.innerText = oldValue;
+    bottom.innerText = oldValue;
+    topBack.innerText = newValue;
+    bottomBack.innerText = newValue;
 
-    // Cleanup after animation
+    // Remove previous animation class and force reflow
+    cardEl.classList.remove('flipping');
+    void cardEl.offsetWidth;
+
+    // Start animation
+    cardEl.classList.add('flipping');
+
+    // After animation completes, update all to new value
     setTimeout(() => {
+        cardEl.classList.remove('flipping');
         top.innerText = newValue;
         bottom.innerText = newValue;
-        cardEl.classList.remove('flip-down');
-    }, 600); // Match CSS transition duration
+    }, 600);
 }
 
 function updateDate(now) {

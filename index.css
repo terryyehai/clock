@@ -5,11 +5,13 @@
     --text-color: #e0e0e0;
     --card-bg: #333;
     --card-text: #f0f0f0;
-    --accent-color: #ff4500; /* For alarm or active elements */
+    --accent-color: #ff4500;
     --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     --flip-duration: 0.6s;
     --modal-bg: #2a2a2a;
     --card-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    --card-height: 160px;
+    --card-width: 120px;
 }
 
 [data-theme="minimalist"] {
@@ -98,28 +100,23 @@ body {
     align-items: center;
     justify-content: center;
     gap: 15px;
-    perspective: 1000px;
 }
 
 .separator {
     font-size: 5rem;
     font-weight: bold;
-    padding-bottom: 20px; /* Align visually with cards */
+    color: var(--card-text);
 }
 
-/* Flip Card Core */
+/* ========================================
+   FLIP CARD - Complete Rewrite
+   ======================================== */
+
 .flip-unit {
     position: relative;
-    width: 120px;
-    height: 160px;
-    background-color: var(--card-bg);
-    border-radius: 10px;
-    box-shadow: var(--card-shadow);
-    font-size: 6rem;
-    font-weight: bold;
-    color: var(--card-text);
-    text-align: center;
-    line-height: 160px;
+    width: var(--card-width);
+    height: var(--card-height);
+    perspective: 300px;
 }
 
 .flip-card {
@@ -128,92 +125,120 @@ body {
     height: 100%;
 }
 
-/* Top and Bottom Halves */
-.top, .bottom, .top-back, .bottom-back {
+/* Each half of the card */
+.flip-card .top,
+.flip-card .bottom,
+.flip-card .top-back,
+.flip-card .bottom-back {
     position: absolute;
     left: 0;
     width: 100%;
     height: 50%;
     overflow: hidden;
     background-color: var(--card-bg);
+    color: var(--card-text);
+    font-size: 6rem;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: var(--card-shadow);
 }
 
-.top, .top-back {
+/* TOP HALF - shows upper portion of digit */
+.flip-card .top,
+.flip-card .top-back {
     top: 0;
     border-radius: 10px 10px 0 0;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
+    line-height: var(--card-height);
+    /* This centers the FULL height text */
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
 
-.bottom, .bottom-back {
+/* BOTTOM HALF - shows lower portion of digit */
+.flip-card .bottom,
+.flip-card .bottom-back {
     bottom: 0;
     border-radius: 0 0 10px 10px;
-    line-height: 0; /* Align text to top of bottom half */
-    display: flex;
-    align-items: flex-end; /* Align text to bottom visually */
-    justify-content: center;
-}
-/* Adjust line-height/alignment for split effect */
-.top, .top-back {
-    line-height: 160px;
-}
-.bottom, .bottom-back {
-    line-height: 0; /* Trick to show bottom half of text */
-}
-/* Revisit the text positioning for perfect split */
-.top span, .top-back span, .bottom span, .bottom-back span {
-    display: block;
-    height: 160px;
-}
-/* Actually, simpler way specifically for fixed height */
-/* Let's use the standard flip implementation */
-
-.flip-unit .top, .flip-unit .top-back {
-    line-height: 160px; /* Center text vertically in full height */
-}
-.flip-unit .bottom, .flip-unit .bottom-back {
-    line-height: 0; 
+    /* Negative line-height trick: pull text up so we see bottom half */
+    line-height: 0;
 }
 
+/* Z-index layering for static state */
+.flip-card .top {
+    z-index: 3;
+}
 
-/* Animation Layers */
-.top {
+.flip-card .bottom {
+    z-index: 1;
+}
+
+.flip-card .top-back {
     z-index: 2;
     transform-origin: bottom center;
+    transform: rotateX(90deg);
+    /* Hidden initially */
 }
-.bottom {
+
+.flip-card .bottom-back {
     z-index: 1;
 }
-.top-back {
-    z-index: 1;
+
+/* ========================================
+   FLIP ANIMATION
+   ======================================== */
+
+/* When flipping, the old top folds down */
+.flip-card.flipping .top {
+    animation: flipTop 0.6s ease-in-out forwards;
     transform-origin: bottom center;
-    transform: rotateX(180deg); /* Start flipped up */
-}
-.bottom-back {
-    z-index: 0;
-    transform-origin: top center;
-    transform: rotateX(0deg); 
 }
 
-/* Animation Classes */
-.flip-down .top {
-    transform: rotateX(-180deg);
-    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
+/* The new top (top-back) unfolds from above */
+.flip-card.flipping .top-back {
+    animation: flipTopBack 0.6s ease-in-out forwards;
+    transform-origin: bottom center;
 }
 
-.flip-down .top-back {
-    z-index: 3;
-    transform: rotateX(0deg);
-    transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
-    transform-style: preserve-3d;
-    backface-visibility: hidden;
+@keyframes flipTop {
+    0% {
+        transform: rotateX(0deg);
+        z-index: 3;
+    }
+
+    50% {
+        transform: rotateX(-90deg);
+        z-index: 3;
+    }
+
+    51% {
+        z-index: 1;
+    }
+
+    100% {
+        transform: rotateX(-90deg);
+        z-index: 1;
+    }
 }
 
-.flip-down .bottom-back {
-    z-index: 2; /* Reveal new bottom */
-}
+@keyframes flipTopBack {
+    0% {
+        transform: rotateX(90deg);
+        z-index: 2;
+    }
 
+    50% {
+        transform: rotateX(90deg);
+        z-index: 2;
+    }
+
+    51% {
+        z-index: 4;
+    }
+
+    100% {
+        transform: rotateX(0deg);
+        z-index: 4;
+    }
+}
 
 /* Date Display */
 .date-display {
@@ -242,7 +267,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.8);
+    background-color: rgba(0, 0, 0, 0.8);
     z-index: 200;
     display: flex;
     justify-content: center;
@@ -256,7 +281,7 @@ body {
     width: 90%;
     max-width: 400px;
     color: var(--text-color);
-    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
 }
 
 .modal-content h2 {
@@ -303,11 +328,13 @@ body {
     width: 50px;
     height: 24px;
 }
+
 .toggle-switch input {
     opacity: 0;
     width: 0;
     height: 0;
 }
+
 .slider {
     position: absolute;
     cursor: pointer;
@@ -319,6 +346,7 @@ body {
     transition: .4s;
     border-radius: 34px;
 }
+
 .slider:before {
     position: absolute;
     content: "";
@@ -330,55 +358,53 @@ body {
     transition: .4s;
     border-radius: 50%;
 }
-input:checked + .slider {
+
+input:checked+.slider {
     background-color: var(--accent-color);
 }
-input:checked + .slider:before {
+
+input:checked+.slider:before {
     transform: translateX(26px);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .flip-clock {
-        flex-direction: column; /* Stack for vertical on small screens if needed, or scale down */
-        gap: 10px;
+    :root {
+        --card-height: 100px;
+        --card-width: 80px;
     }
-    
-    /* Better implementation for mobile: Scale down instead of stack completely if landscape preferred, 
-       but for portrait phone stacking is better */
-    
-    /* Let's try to keep horizontal but scale */
-    .flip-unit {
-        width: 80px;
-        height: 100px;
+
+    .flip-card .top,
+    .flip-card .bottom,
+    .flip-card .top-back,
+    .flip-card .bottom-back {
         font-size: 3.5rem;
-        line-height: 100px;
     }
-    
-    .flip-unit .top, .flip-unit .top-back {
-        line-height: 100px;
-    }
-    
+
     .separator {
         font-size: 3rem;
     }
-    
-    /* If oriented portrait */
-    @media (orientation: portrait) {
-       .flip-clock {
-           flex-direction: column;
-       }
-       .separator {
-           display: none;
-       }
-       .flip-unit {
-           width: 160px;
-           height: 200px;
-           font-size: 8rem;
-           line-height: 200px;
-       }
-       .flip-unit .top, .flip-unit .top-back {
-            line-height: 200px;
-       }
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+    :root {
+        --card-height: 140px;
+        --card-width: 100px;
+    }
+
+    .flip-clock {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .separator {
+        display: none;
+    }
+
+    .flip-card .top,
+    .flip-card .bottom,
+    .flip-card .top-back,
+    .flip-card .bottom-back {
+        font-size: 5rem;
     }
 }
