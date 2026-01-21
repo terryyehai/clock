@@ -7,13 +7,10 @@
     <title>FlipTime Web</title>
     <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="index.css">
-    <!-- Day.js -->
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/utc.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/timezone.js"></script>
-    <!-- Lunar Javascript -->
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.min.js"></script>
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
@@ -26,37 +23,33 @@
 
         <main class="clock-display">
             <div class="flip-clock">
-                <!-- Hours -->
                 <div class="flip-unit" id="hours">
-                    <div class="flip-card" data-value="00">
-                        <div class="top"><span>00</span></div>
-                        <div class="bottom"><span>00</span></div>
-                        <div class="top-back"><span>00</span></div>
-                        <div class="bottom-back"><span>00</span></div>
+                    <div class="flip-card">
+                        <div class="top">00</div>
+                        <div class="bottom">00</div>
+                        <div class="top-back">00</div>
+                        <div class="bottom-back">00</div>
                     </div>
                 </div>
                 <div class="separator">:</div>
-                <!-- Minutes -->
                 <div class="flip-unit" id="minutes">
-                    <div class="flip-card" data-value="00">
-                        <div class="top"><span>00</span></div>
-                        <div class="bottom"><span>00</span></div>
-                        <div class="top-back"><span>00</span></div>
-                        <div class="bottom-back"><span>00</span></div>
+                    <div class="flip-card">
+                        <div class="top">00</div>
+                        <div class="bottom">00</div>
+                        <div class="top-back">00</div>
+                        <div class="bottom-back">00</div>
                     </div>
                 </div>
                 <div class="separator">:</div>
-                <!-- Seconds -->
                 <div class="flip-unit" id="seconds">
-                    <div class="flip-card" data-value="00">
-                        <div class="top"><span>00</span></div>
-                        <div class="bottom"><span>00</span></div>
-                        <div class="top-back"><span>00</span></div>
-                        <div class="bottom-back"><span>00</span></div>
+                    <div class="flip-card">
+                        <div class="top">00</div>
+                        <div class="bottom">00</div>
+                        <div class="top-back">00</div>
+                        <div class="bottom-back">00</div>
                     </div>
                 </div>
             </div>
-
             <div class="date-display">
                 <div id="date-gregorian" class="date-item">loading...</div>
                 <div id="date-lunar" class="date-item sub-text">loading...</div>
@@ -76,11 +69,11 @@
                 <label>主題</label>
                 <div class="theme-options">
                     <button class="theme-btn" data-theme="classic" title="經典黑"
-                        style="background: #000; border: 1px solid #fff;"></button>
+                        style="background:#000;border:1px solid #fff;"></button>
                     <button class="theme-btn" data-theme="minimalist" title="極簡白"
-                        style="background: #fff; border: 1px solid #000;"></button>
+                        style="background:#fff;border:1px solid #000;"></button>
                     <button class="theme-btn" data-theme="neon" title="霓虹夜"
-                        style="background: #111; border: 1px solid #0ff;"></button>
+                        style="background:#111;border:1px solid #0ff;"></button>
                 </div>
             </div>
             <div class="setting-item">

@@ -1,25 +1,22 @@
-// State and Configuration
+// State
 const state = {
-    timezone: 'Asia/Taipei', // Default
+    timezone: 'Asia/Taipei',
     theme: 'classic',
     is24Hour: true,
     alarms: [],
-    previousTime: { h: null, m: null, s: null }
+    prev: { h: null, m: null, s: null }
 };
 
-// DOM Elements (populated after DOMContentLoaded)
 let els = {};
 
-// Initialize
+// Init
 function init() {
-    // Populate DOM elements
     els = {
         h: document.getElementById('hours').querySelector('.flip-card'),
         m: document.getElementById('minutes').querySelector('.flip-card'),
         s: document.getElementById('seconds').querySelector('.flip-card'),
         dateGregorian: document.getElementById('date-gregorian'),
         dateLunar: document.getElementById('date-lunar'),
-        app: document.getElementById('app'),
         settingsModal: document.getElementById('settings-modal'),
         alarmModal: document.getElementById('alarm-modal'),
         timezoneSelect: document.getElementById('timezone-select'),
@@ -29,124 +26,91 @@ function init() {
     };
 
     loadSettings();
-    loadAlarmSettings();
     applyTheme(state.theme);
     setupTimezones();
 
-    // Register Plugins
     dayjs.extend(dayjs_plugin_utc);
     dayjs.extend(dayjs_plugin_timezone);
 
-    // Start Clock
     updateClock();
     setInterval(updateClock, 1000);
 
-    // Event Listeners
     setupEventListeners();
-
-    // Wake Lock
     requestWakeLock();
 }
 
-// Core Clock Logic
+// Clock
 function updateClock() {
     const now = dayjs().tz(state.timezone);
-
     let h = now.hour();
-    const m = now.minute();
-    const s = now.second();
-
-    // Format Handling
-    if (!state.is24Hour) {
-        h = h % 12 || 12;
-    }
+    if (!state.is24Hour) h = h % 12 || 12;
 
     const hStr = String(h).padStart(2, '0');
-    const mStr = String(m).padStart(2, '0');
-    const sStr = String(s).padStart(2, '0');
+    const mStr = String(now.minute()).padStart(2, '0');
+    const sStr = String(now.second()).padStart(2, '0');
 
-    // Update Flips
-    updateFlipUnit(els.h, hStr, state.previousTime.h);
-    updateFlipUnit(els.m, mStr, state.previousTime.m);
-    updateFlipUnit(els.s, sStr, state.previousTime.s);
+    flipUpdate(els.h, hStr, state.prev.h);
+    flipUpdate(els.m, mStr, state.prev.m);
+    flipUpdate(els.s, sStr, state.prev.s);
 
-    state.previousTime = { h: hStr, m: mStr, s: sStr };
-
-    // Update Date
+    state.prev = { h: hStr, m: mStr, s: sStr };
     updateDate(now);
-
-    // Check Alarms
     checkAlarms(now);
 }
 
-// Flip Animation Logic
-function updateFlipUnit(cardEl, newValue, oldValue) {
-    if (newValue === oldValue) return;
+function flipUpdate(card, val, prev) {
+    if (val === prev) return;
 
-    // Target the span inside each half
-    const top = cardEl.querySelector('.top span');
-    const bottom = cardEl.querySelector('.bottom span');
-    const topBack = cardEl.querySelector('.top-back span');
-    const bottomBack = cardEl.querySelector('.bottom-back span');
+    const top = card.querySelector('.top');
+    const bottom = card.querySelector('.bottom');
+    const topBack = card.querySelector('.top-back');
+    const bottomBack = card.querySelector('.bottom-back');
 
-    // If first run, just set values without animation
-    if (oldValue === null) {
-        top.innerText = newValue;
-        bottom.innerText = newValue;
-        topBack.innerText = newValue;
-        bottomBack.innerText = newValue;
+    if (prev === null) {
+        top.textContent = val;
+        bottom.textContent = val;
+        topBack.textContent = val;
+        bottomBack.textContent = val;
         return;
     }
 
-    // Prepare animation:
-    // Current top/bottom show the OLD value
-    // top-back/bottom-back show the NEW value
-    top.innerText = oldValue;
-    bottom.innerText = oldValue;
-    topBack.innerText = newValue;
-    bottomBack.innerText = newValue;
+    // Set values for animation
+    top.textContent = prev;
+    bottom.textContent = prev;
+    topBack.textContent = val;
+    bottomBack.textContent = val;
 
-    // Remove previous animation class and force reflow
-    cardEl.classList.remove('flipping');
-    void cardEl.offsetWidth;
+    card.classList.remove('flipping');
+    void card.offsetWidth;
+    card.classList.add('flipping');
 
-    // Start animation
-    cardEl.classList.add('flipping');
-
-    // After animation completes, update all to new value
     setTimeout(() => {
-        cardEl.classList.remove('flipping');
-        top.innerText = newValue;
-        bottom.innerText = newValue;
-    }, 600);
+        card.classList.remove('flipping');
+        top.textContent = val;
+        bottom.textContent = val;
+    }, 500);
 }
 
 function updateDate(now) {
-    // Gregorian
     const days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
-    els.dateGregorian.innerText = `${now.format('YYYY年 MM月 DD日')} ${days[now.day()]}`;
-
-    // Lunar
+    els.dateGregorian.textContent = `${now.format('YYYY年 MM月 DD日')} ${days[now.day()]}`;
     try {
         const lunar = Lunar.fromDate(now.toDate());
-        els.dateLunar.innerText = `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月 ${lunar.getDayInChinese()}`;
-    } catch (e) {
-        console.error("Lunar conversion failed", e);
-    }
+        els.dateLunar.textContent = `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInChinese()}月 ${lunar.getDayInChinese()}`;
+    } catch (e) { }
 }
 
-// Settings & Storage
+// Settings
 function loadSettings() {
     const saved = localStorage.getItem('fliptime-settings');
     if (saved) {
-        const parsed = JSON.parse(saved);
-        state.timezone = parsed.timezone || state.timezone;
-        state.theme = parsed.theme || state.theme;
-        state.is24Hour = parsed.is24Hour !== undefined ? parsed.is24Hour : state.is24Hour;
+        const p = JSON.parse(saved);
+        state.timezone = p.timezone || state.timezone;
+        state.theme = p.theme || state.theme;
+        state.is24Hour = p.is24Hour !== undefined ? p.is24Hour : true;
     }
-
     els.formatToggle.checked = !state.is24Hour;
-    els.formatLabel.innerText = state.is24Hour ? '24H' : '12H';
+    els.formatLabel.textContent = state.is24Hour ? '24H' : '12H';
 }
 
 function saveSettings() {
@@ -157,22 +121,21 @@ function saveSettings() {
     }));
 }
 
-function applyTheme(themeName) {
-    document.body.setAttribute('data-theme', themeName);
-    state.theme = themeName;
+function applyTheme(t) {
+    document.body.setAttribute('data-theme', t);
+    state.theme = t;
     saveSettings();
 }
 
 function setupTimezones() {
-    const commonZones = [
+    const zones = [
         { name: '台北 (GMT+8)', value: 'Asia/Taipei' },
         { name: '東京 (GMT+9)', value: 'Asia/Tokyo' },
         { name: '紐約 (GMT-5)', value: 'America/New_York' },
         { name: '倫敦 (GMT+0)', value: 'Europe/London' },
         { name: 'UTC', value: 'UTC' }
     ];
-
-    els.timezoneSelect.innerHTML = commonZones.map(z =>
+    els.timezoneSelect.innerHTML = zones.map(z =>
         `<option value="${z.value}" ${z.value === state.timezone ? 'selected' : ''}>${z.name}</option>`
     ).join('');
 }
@@ -183,146 +146,105 @@ async function requestWakeLock() {
     if ('wakeLock' in navigator) {
         try {
             wakeLock = await navigator.wakeLock.request('screen');
-            console.log('Wake Lock active');
-        } catch (err) {
-            console.error(`${err.name}, ${err.message}`);
-        }
+        } catch (e) { }
     }
 }
 
-// Event Listeners Setup
+// Events
 function setupEventListeners() {
-    // Settings Modal
-    document.getElementById('settings-btn').addEventListener('click', () => els.settingsModal.classList.remove('hidden'));
-    document.getElementById('close-settings').addEventListener('click', () => els.settingsModal.classList.add('hidden'));
+    document.getElementById('settings-btn').onclick = () => els.settingsModal.classList.remove('hidden');
+    document.getElementById('close-settings').onclick = () => els.settingsModal.classList.add('hidden');
+    document.getElementById('alarm-btn').onclick = () => els.alarmModal.classList.remove('hidden');
+    document.getElementById('close-alarm').onclick = () => els.alarmModal.classList.add('hidden');
 
-    // Alarm Modal
-    document.getElementById('alarm-btn').addEventListener('click', () => els.alarmModal.classList.remove('hidden'));
-    document.getElementById('close-alarm').addEventListener('click', () => els.alarmModal.classList.add('hidden'));
+    els.themeBtns.forEach(btn => btn.onclick = e => applyTheme(e.target.dataset.theme));
 
-    // Theme Switching
-    els.themeBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => applyTheme(e.target.dataset.theme));
-    });
-
-    // Timezone
-    els.timezoneSelect.addEventListener('change', (e) => {
+    els.timezoneSelect.onchange = e => {
         state.timezone = e.target.value;
         saveSettings();
-        state.previousTime = { h: null, m: null, s: null }; // Force immediate update
-    });
+        state.prev = { h: null, m: null, s: null };
+    };
 
-    // Format Toggle
-    els.formatToggle.addEventListener('change', (e) => {
+    els.formatToggle.onchange = e => {
         state.is24Hour = !e.target.checked;
-        els.formatLabel.innerText = state.is24Hour ? '24H' : '12H';
+        els.formatLabel.textContent = state.is24Hour ? '24H' : '12H';
         saveSettings();
-        state.previousTime = { h: null, m: null, s: null }; // Force refresh
-    });
+        state.prev = { h: null, m: null, s: null };
+    };
 
-    // Alarm Add Button
-    document.getElementById('add-alarm-btn').addEventListener('click', addAlarm);
+    document.getElementById('add-alarm-btn').onclick = addAlarm;
 }
 
-// Alarm Logic
+// Alarms
 let audioCtx;
-function playAlarmSound() {
-    if (!audioCtx) {
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    // Create oscillator for beep
-    const oscillator = audioCtx.createOscillator();
-    const gainNode = audioCtx.createGain();
-
-    oscillator.type = 'sine';
-    oscillator.frequency.setValueAtTime(440, audioCtx.currentTime); // A4
-    oscillator.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.1);
-
-    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-
-    oscillator.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.5);
+function playAlarm() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.5);
 }
 
 function checkAlarms(now) {
-    const currentHM = now.format('HH:mm');
-    // Only trigger if seconds is 00 to avoid multiple triggers per minute
     if (now.second() !== 0) return;
-
-    state.alarms.forEach(alarm => {
-        if (alarm.time === currentHM && alarm.enabled) {
-            playAlarmSound();
-            // Visual alert - flash the screen
+    const hm = now.format('HH:mm');
+    state.alarms.forEach(a => {
+        if (a.time === hm && a.enabled) {
+            playAlarm();
             document.body.style.backgroundColor = 'var(--accent-color)';
-            setTimeout(() => {
-                document.body.style.backgroundColor = 'var(--bg-color)';
-            }, 500);
+            setTimeout(() => document.body.style.backgroundColor = 'var(--bg-color)', 500);
         }
     });
 }
 
-// Alarm UI Management
 function renderAlarms() {
-    const list = document.getElementById('alarm-list');
-    list.innerHTML = state.alarms.map((alarm, index) => `
-        <div class="alarm-item" style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <span>${alarm.time}</span>
+    document.getElementById('alarm-list').innerHTML = state.alarms.map((a, i) => `
+        <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+            <span>${a.time}</span>
             <div>
-                <button onclick="toggleAlarm(${index})">${alarm.enabled ? '開啟' : '關閉'}</button>
-                <button onclick="deleteAlarm(${index})">刪除</button>
+                <button onclick="toggleAlarm(${i})">${a.enabled ? '開' : '關'}</button>
+                <button onclick="deleteAlarm(${i})">刪除</button>
             </div>
         </div>
     `).join('');
 }
 
 function addAlarm() {
-    const timeInput = document.getElementById('new-alarm-time');
-    if (timeInput.value) {
-        state.alarms.push({ time: timeInput.value, enabled: true });
+    const input = document.getElementById('new-alarm-time');
+    if (input.value) {
+        state.alarms.push({ time: input.value, enabled: true });
         localStorage.setItem('fliptime-alarms', JSON.stringify(state.alarms));
         renderAlarms();
-        timeInput.value = '';
+        input.value = '';
     }
 }
 
-// Global scope for onclick handlers
-window.toggleAlarm = function (index) {
-    state.alarms[index].enabled = !state.alarms[index].enabled;
+window.toggleAlarm = i => {
+    state.alarms[i].enabled = !state.alarms[i].enabled;
     localStorage.setItem('fliptime-alarms', JSON.stringify(state.alarms));
     renderAlarms();
 };
 
-window.deleteAlarm = function (index) {
-    state.alarms.splice(index, 1);
+window.deleteAlarm = i => {
+    state.alarms.splice(i, 1);
     localStorage.setItem('fliptime-alarms', JSON.stringify(state.alarms));
     renderAlarms();
 };
 
-function loadAlarmSettings() {
+function loadAlarms() {
     const saved = localStorage.getItem('fliptime-alarms');
-    if (saved) {
-        state.alarms = JSON.parse(saved);
-        renderAlarms();
-    }
+    if (saved) { state.alarms = JSON.parse(saved); renderAlarms(); }
 }
 
-// Service Worker Registration
+// Service Worker
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js')
-            .then(registration => {
-                console.log('SW registered: ', registration);
-            })
-            .catch(registrationError => {
-                console.log('SW registration failed: ', registrationError);
-            });
-    });
+    navigator.serviceWorker.register('./sw.js').catch(() => { });
 }
 
-// Start on DOMContentLoaded
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', () => { init(); loadAlarms(); });
